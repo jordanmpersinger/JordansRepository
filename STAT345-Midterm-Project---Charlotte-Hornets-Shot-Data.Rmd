@@ -1,0 +1,310 @@
+---
+title: "STAT345 Midterm Project - Charlotte Hornets Shot Data"
+author: "Jordan Persinger"
+date: '2022-03-28'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### The Project Description
+
+My role for this project is that of a data analyst intern for the Charlotte Hornets of the National Basketball Association. I have been assigned to create a data visualization to show how the teams shots have changed over the years. I have used statistics from the NBA Stats website and the `nbastatR` package to do so. In this presentation I will be showing the graphics I have created as well as the general trends I have noticed from these graphics and data sets.
+
+### The Graphics
+
+I would like to first show the shot chart graphics I have created based on the data directly from the NBA Stats website shown through the data sets and functions within the `nbastatR` package. These graphics show the shot chart data for the Charlotte Hornets basketball team over 4 recent seasons in the NBA. 
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+# Install necessary packages
+library(nbastatR)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(grid)
+library(jpeg)
+library(RCurl)
+library(ggpubr)
+```
+
+### Graph representing the Charlotte Hornets 2015-2016 Season
+
+The following graphs are based on 4 seasons for the Charlotte Hornets basketball team: 2015-2019. Some findings for these graphs include:
+
+1. There are many overlapping shots taken throughout these seasons according to the data set.
+    
+    + I accounted for this by adding transparency to the points so it can be better seen how many shots there truly are and where they fell.
+    
+2. The point of this project was to show how the shots changed over the years.
+
+    + I used the `ggarrange` function to show these graphs side-by-side in one figure to better display this.
+    
+3. The possibility of some shots not displaying on the graphs.
+
+    + This is because I used a half court diagram which means some of the longer than half-court shots got cut off in the graphing process as they would be out of the set bounds.
+    
+4. Some variables had to be changed to accurately show and contextualize the data.
+
+    + This is because the data was scaled in a way that didn't matchup with the actual dimensions of an NBA court.
+    
+5. The choice to have 4 different graphs: one for each season.
+
+    + Seeing the data is much easier with looking at one graph and then comparing to the other graphs afterwards. This is why I faceted them together at the end.
+
+6. There are some cool ways to display NBA shot data in R and a lot of potential for visually representing NBA data.
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Create and store data for the 2015-2016 Charlotte Hornets NBA Season
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+
+hornets_shot_dat16 <- teams_shots(
+  teams = "Charlotte Hornets",
+  team_ids = NULL,
+  all_active_teams = F,
+  season_types = "Regular Season",
+  seasons = 2016,
+  measures = "FGA",
+  periods = 0,
+  months = 0,
+  date_from = NA,
+  date_to = NA,
+  nest_data = F,
+  return_message = T
+)
+
+hornets_shot_dat16
+
+# Insert half court image
+courtImg.URL <- "https://cdn.discordapp.com/attachments/692824558134362183/958903876587782174/0adc29bad96111f4.png"
+court <- rasterGrob(readJPEG(getURLContent(courtImg.URL)),
+           width=unit(1,"npc"), height=unit(1,"npc"))
+
+# Create new shot distance variable 
+shotFeetX16 <- hornets_shot_dat16$locationX / 10
+shotFeetY16 <- hornets_shot_dat16$locationY / 10
+
+p1 <- ggplot(hornets_shot_dat16, aes(x=shotFeetX16, y=shotFeetY16, color=isShotMade)) + 
+      annotation_custom(court, -25, 25, -5, 42) + labs(color="Was the shot made?") + 
+      ggtitle("2015-2016 Charlotte Hornets Shot Chart") + theme(plot.title = element_text(color = "darkblue")) +            xlab("Horizontal Distance from Hoop in ft") + ylab("Vertical Distance from Hoop in ft") + 
+      theme(axis.title.x = element_text(colour = "darkblue"), axis.title.y = element_text(colour = "darkblue")) +           geom_point(aes(colour = isShotMade, alpha = 0.5), size = 1) + 
+      theme(panel.background = element_rect(fill="darkcyan", colour="darkcyan")) + 
+      scale_color_discrete(name = "Was the shot made?", labels = c("No", "Yes")) + xlim(-30,30) + ylim(-10,50) +            theme(plot.title = element_text(hjust = 0.5))
+
+p1
+```
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Create and store data for the 2016-2017 Charlotte Hornets NBA Season
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+
+hornets_shot_dat17 <- teams_shots(
+  teams = "Charlotte Hornets",
+  team_ids = NULL,
+  all_active_teams = F,
+  season_types = "Regular Season",
+  seasons = 2017,
+  measures = "FGA",
+  periods = 0,
+  months = 0,
+  date_from = NA,
+  date_to = NA,
+  nest_data = F,
+  return_message = T
+)
+
+hornets_shot_dat17
+
+# Insert half court image
+courtImg.URL <- "https://cdn.discordapp.com/attachments/692824558134362183/958903876587782174/0adc29bad96111f4.png"
+court <- rasterGrob(readJPEG(getURLContent(courtImg.URL)),
+           width=unit(1,"npc"), height=unit(1,"npc"))
+
+# Create new shot distance variables
+shotFeetX17 <- hornets_shot_dat17$locationX / 10
+shotFeetY17 <- hornets_shot_dat17$locationY / 10
+
+# Plot shot chart data for 2016-2017 season
+p2 <- ggplot(hornets_shot_dat17, aes(x=shotFeetX17, y=shotFeetY17, color=isShotMade)) + 
+      annotation_custom(court, -25, 25, -5, 42) + labs(color="Was the shot made?") + 
+      ggtitle("2016-2017 Charlotte Hornets Shot Chart") + theme(plot.title = element_text(color = "darkblue")) +           xlab("Horizontal Distance from Hoop in ft") + ylab("Vertical Distance from Hoop in ft") + 
+      theme(axis.title.x = element_text(colour = "darkblue"), axis.title.y = element_text(colour = "darkblue")) +          geom_point(aes(colour = isShotMade, alpha = 0.5), size = 1) + 
+      theme(panel.background = element_rect(fill="darkcyan", colour="darkcyan")) + 
+      scale_color_discrete(name = "Was the shot made?", labels = c("No", "Yes")) + xlim(-30,30) + ylim(-10,50) +           theme(plot.title = element_text(hjust = 0.5))
+
+p2
+```
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Create and store data for the 2017-2018 Charlotte Hornets NBA Season
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+
+hornets_shot_dat18 <- teams_shots(
+  teams = "Charlotte Hornets",
+  team_ids = NULL,
+  all_active_teams = F,
+  season_types = "Regular Season",
+  seasons = 2018,
+  measures = "FGA",
+  periods = 0,
+  months = 0,
+  date_from = NA,
+  date_to = NA,
+  nest_data = F,
+  return_message = T
+)
+
+hornets_shot_dat18
+
+# Insert half court image
+courtImg.URL <- "https://cdn.discordapp.com/attachments/692824558134362183/958903876587782174/0adc29bad96111f4.png"
+court <- rasterGrob(readJPEG(getURLContent(courtImg.URL)),
+           width=unit(1,"npc"), height=unit(1,"npc"))
+
+# Create new shot distance variables
+shotFeetX18 <- hornets_shot_dat18$locationX / 10
+shotFeetY18 <- hornets_shot_dat18$locationY / 10
+
+# Plot shot chart data for the 2017-2018 season
+p3 <- ggplot(hornets_shot_dat18, aes(x=shotFeetX18, y=shotFeetY18, color=isShotMade)) + 
+      annotation_custom(court, -25, 25, -5, 42) + labs(color="Was the shot made?") + 
+      ggtitle("2017-2018 Charlotte Hornets Shot Chart") + theme(plot.title = element_text(color = "darkblue")) +           xlab("Horizontal Distance from Hoop in ft") + ylab("Vertical Distance from Hoop in ft") + 
+      theme(axis.title.x = element_text(colour = "darkblue"), axis.title.y = element_text(colour = "darkblue")) +          geom_point(aes(colour = isShotMade, alpha = 0.5), size = 1) + 
+      theme(panel.background = element_rect(fill="darkcyan", colour="darkcyan")) + 
+      scale_color_discrete(name = "Was the shot made?", labels = c("No", "Yes")) + xlim(-30,30) + ylim(-10,50) +           theme(plot.title = element_text(hjust = 0.5))
+
+p3
+```
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Create and store data for the 2018-2019 Charlotte Hornets NBA Season
+
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+
+hornets_shot_dat19 <- teams_shots(
+  teams = "Charlotte Hornets",
+  team_ids = NULL,
+  all_active_teams = F,
+  season_types = "Regular Season",
+  seasons = 2019,
+  measures = "FGA",
+  periods = 0,
+  months = 0,
+  date_from = NA,
+  date_to = NA,
+  nest_data = F,
+  return_message = T
+)
+
+hornets_shot_dat19
+
+# Insert half court image
+courtImg.URL <- "https://cdn.discordapp.com/attachments/692824558134362183/958903876587782174/0adc29bad96111f4.png"
+court <- rasterGrob(readJPEG(getURLContent(courtImg.URL)),
+           width=unit(1,"npc"), height=unit(1,"npc"))
+
+# Create new shot distance variables
+shotFeetX19 <- hornets_shot_dat19$locationX / 10
+shotFeetY19 <- hornets_shot_dat19$locationY / 10
+
+# Plot shot chart data for the 2018-2019 season
+p4 <- ggplot(hornets_shot_dat19, aes(x=shotFeetX19, y=shotFeetY19, color=isShotMade)) + 
+      annotation_custom(court, -25, 25, -5, 42) + labs(color="Was the shot made?") + 
+      ggtitle("2018-2019 Charlotte Hornets Shot Chart") + theme(plot.title = element_text(color = "darkblue")) +           xlab("Horizontal Distance from Hoop in ft") + ylab("Vertical Distance from Hoop in ft") + 
+      theme(axis.title.x = element_text(colour = "darkblue"), axis.title.y = element_text(colour = "darkblue")) +          geom_point(aes(colour = isShotMade, alpha = 0.5), size = 1) + 
+      theme(panel.background = element_rect(fill="darkcyan", colour="darkcyan")) + 
+      scale_color_discrete(name = "Was the shot made?", labels = c("No", "Yes")) + xlim(-30,30) + ylim(-10,50) +           theme(plot.title = element_text(hjust = 0.5))
+
+p4
+```
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Faceting graphs to organize by year
+ggarrange(p1 + rremove("xy.title"), p2 + rremove("xy.title"), p3 + rremove("xy.title"), p4 + rremove("xy.title"))
+```
+
+### General Findings Further Explained
+
+It may be obvious but as we can see in the graphs, the shot becomes way easier to make as the player gets closer to the paint. I used an alpha value of 0.5 so that the points would be pretty transparent to best show this, although if I were to redo this project, I might consider binning these points so there is less of them so we can better see "hot spots". I think the goal was still accomplished pretty well here though as we can easily see general trends. For example, it is pretty apparent that as get toward the end of the interval (2018-2019 season), more long 3s were made.
+
+The `ggarrange` function was a decent choice for showing the change over time, however, I think that `gganimate` also has some potential for showing the change over time. I tried to incorporate this idea, however, i was having a lot of trouble getting the code to work so I opted for the slightly easier option. If I were to come back to this idea though, I feel like there is a lot of potential for not only showing team shot chart stats over time, but also players' career stats with the Hornets.
+
+The following are the counts for removed values in the graphs from 2015-2019: 6, 9, 13, 22 respectively. These counts represent the amount of full court shots in each year. These shots are not really important to the data set so I thought it would be fine to leave them off so they wouldn't be a visual distraction or make it look like there are a ton of outliers.
+
+The hardest part of cleaning the data I would say was figuring out what the counts for the locationX and locationY variable were in the data set. These variables had very high counts which led to my graphs being scaled very oddly. Eventually, I used the dimensions of a full size NBA court and realized that these values were just multiplied by 10 from the actual shot distance.
+
+### Final Shot Graphics Conclusions
+
+I think the biggest thing I would like to change for the future is finding way to bring more life to these graphics. They are informational and useful, however, a tad dull. I think the R platform has a ton of options, packages, and functions that can accomplish this thought and this would be a very fun project to continue. 
+
+
+
+### More Data Graphics
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# Kemba Walker Image
+knitr::include_graphics("Kemba-Walker-Hornets- copy.jpeg")
+```
+
+
+Let's now look at a different variable and a different data set to show what R can do for actual players statistics. Let's take a player and examine their data in the `nbastatR` package to look at general trends throughout their career. For this, we'll take a look at Kemba Walker's data in the package.
+
+Kemba Walker is one of the greatest shooter and scorers in the history of the Charlotte Hornets franchise. He was also with the Charlotte Hornets for the vast majority of his career so I thought exploring his data would only be right as there is a ton of it to potentially look at. For this project, we are only going to look at two of the biggest scoring categories for a point guard: Points per game ranking and 3 pointers made ranking. We are going to look at this data over the span of his entire career to look at trends for when he played with the Hornets and with other teams.
+
+### Kemba Walker's PPG Career Rankings
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Create Kemba Walker's Career Data
+kemba_data <- players_careers(
+           players = "Kemba Walker",
+           player_ids = "202689",
+           modes = c("PerGame", "Totals"),
+           assign_to_environment = TRUE,
+           add_mode_names = TRUE,
+           )
+           
+# Plot Kemba Walker's Points per game ranking over the years           
+kemba_plotPPG <- ggplot(kemba_data[[5]][[19]], aes(x=slugSeason, y=ptsRank, group=1)) + 
+                 geom_line(size=2, color="darkcyan") + geom_point(size=2) + 
+                 ggtitle("K Walker's PPG Rankings") + 
+                 theme(plot.title = element_text(color = "purple")) + 
+                 theme(plot.title = element_text(hjust = 0.5, face="bold")) + xlab("NBA Season") + 
+                 ylab("PPG Ranking") + theme(panel.background = element_rect(fill="lightblue", colour="gainsboro")) +                  theme(axis.title.x = element_text(colour = "darkblue"), axis.title.y = element_text(colour = "darkblue")) + 
+                 geom_label(aes(label = ptsRank), nudge_x = 0.25, nudge_y = 0.25, check_overlap = TRUE, size = 3) +                   ylim(0,250)
+
+kemba_plotPPG
+```
+
+### Kemba Walker's 3PM Career Rankings
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Plot Kemba Walker's 3 Pointers made ranking over the years
+kemba_plot3s <- ggplot(kemba_data[[5]][[19]], aes(x=slugSeason, y=fg3mRank, group=1)) + 
+                geom_line(size=2, color="darkcyan") + geom_point(size=2) + 
+                ggtitle("K Walker's 3PM Rankings") + 
+                theme(plot.title = element_text(color = "purple")) + 
+                theme(plot.title = element_text(hjust = 0.5, face="bold")) + xlab("NBA Season") + 
+                ylab("3 Pointers Made Ranking") + 
+                theme(panel.background = element_rect(fill="lightblue", colour="gainsboro")) + 
+                theme(axis.title.x = element_text(colour = "darkblue"), axis.title.y = element_text(colour = "darkblue")) + 
+                geom_label(aes(label = fg3mRank), nudge_x = 0.25, nudge_y = 0.25, check_overlap = TRUE, size = 3) +                  ylim(0,250)
+
+kemba_plot3s
+```
+
+
+Here, we can see that the prime years of Kemba Walker's career were with the Charlotte Hornets from 2015-2019. He ranked in the top 15 in the NBA in both points per game and 3 pointers made throughout each of those NBA seasons. Kemba Walker was traded away from the Charlotte Hornets after after this seasons which proved to be detrimental for his career. As we can see, there is a sharp fall-off in both categories after he left the Hornets in both major scoring categories.
+
+```{r, echo=FALSE, warning=FALSE, results='hide'}
+# Side by Side
+ggarrange(kemba_plotPPG + rremove("xy.title") + rremove("x.axis"), kemba_plot3s + rremove("xy.title"))
+```
+
+As we can see with a side by side visual, the general trend for Kemba Walker's scoring efficiency throughout his career his very similar when regarding both major scoring variables. 
+
+### Final Thoughts
+
+R can do a ton with representing data visually. Some other ideas that I think would be cool to incorporate for NBA stats data in the future include:
+
++ Play-by-play animated visuals from the best moments in NBA history
++ Heatmaps to show hot spots regarding NBA shot data specifically
++ "Big Man" utilization and size comparisons across playoff NBA teams
++ Shot data differentials across playoff games vs regular season games
